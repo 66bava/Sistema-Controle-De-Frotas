@@ -1,4 +1,7 @@
 const icons = {
+  usuarios:
+    '<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M17 4a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5v2"/>',
+  correcoes: '<path d="m4 16 12-12 4 4-12 12H4zM13 7l4 4M4 4h5M20 15v5h-6"/>',
   inicio: '<path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/>',
   nova: '<path d="M12 5v14M5 12h14"/><rect x="3" y="3" width="18" height="18" rx="4"/>',
   viagens:
@@ -9,6 +12,8 @@ const icons = {
     '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M10 21v-6h4v6"/>',
 };
 const labels = {
+  usuarios: 'Usuários',
+  correcoes: 'Correções pendentes',
   inicio: 'Início',
   nova: 'Nova viagem',
   viagens: 'Minhas viagens',
@@ -17,6 +22,8 @@ const labels = {
   setores: 'Setores',
 };
 const urls = {
+  usuarios: '/painel.html?secao=usuarios',
+  correcoes: '/painel.html?secao=correcoes',
   inicio: '/painel.html',
   nova: '/ocorrencias.html?nova=1',
   viagens: '/ocorrencias.html',
@@ -55,13 +62,14 @@ export function iniciarNavegacao(usuario, chave = 'inicio') {
   nav.replaceChildren();
   nav.append(link('inicio'));
   if (usuario.perfil === 'driver') nav.append(link('nova'));
+  nav.append(link('correcoes'));
   nav.append(link('viagens', usuario.perfil === 'driver' ? 'Minhas viagens' : 'Todas as viagens'));
   if (usuario.perfil === 'admin') {
     const heading = document.createElement('p');
     heading.className = 'nav-group-title';
     heading.textContent = 'ADMINISTRAÇÃO';
     nav.append(heading);
-    for (const key of ['aprovacoes', 'veiculos', 'setores']) nav.append(link(key));
+    for (const key of ['aprovacoes', 'usuarios', 'veiculos', 'setores']) nav.append(link(key));
   }
   document.getElementById('menu-nome').textContent = usuario.nome;
   document.getElementById('perfil').textContent = {
@@ -151,6 +159,12 @@ export function atalhosInicio(usuario) {
         ? [
             ['viagens', 'Todas as viagens', 'Consulte as saídas e chegadas da frota.'],
             ['aprovacoes', 'Aprovar condutores', 'Libere o acesso de novos condutores.'],
+            ['usuarios', 'Usuários', 'Gerencie os perfis e os acessos da equipe.'],
+            [
+              'correcoes',
+              'Correções pendentes',
+              'Acompanhe as alterações que aguardam assinatura.',
+            ],
             ['veiculos', 'Veículos', 'Cadastre, edite e organize os veículos.'],
             ['setores', 'Setores', 'Gerencie os setores usados nas viagens.'],
           ]

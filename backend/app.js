@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import cadastrosRoutes from './routes/cadastrosRoutes.js';
 import ocorrenciasRoutes from './routes/ocorrenciasRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import usuariosRoutes from './routes/usuariosRoutes.js';
 const app = express();
 const frontend = fileURLToPath(new URL('../frontend/', import.meta.url));
 app.disable('x-powered-by');
@@ -28,6 +29,7 @@ app.use('/api', (req, res, next) =>
 );
 app.use('/api/ocorrencias', ocorrenciasRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/usuarios', usuariosRoutes);
 app.get('/', (req, res) => res.sendFile(path.join(frontend, 'INDEX.HTML')));
 app.use(express.static(frontend));
 app.use(

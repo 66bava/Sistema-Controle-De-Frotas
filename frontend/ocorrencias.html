@@ -432,6 +432,145 @@
               />
               <p class="field-hint" id="assinatura-info"></p>
             </section>
+            <section
+              id="correcoes-section"
+              class="finish-section"
+              aria-labelledby="correcoes-title"
+            >
+              <div class="panel-heading">
+                <div>
+                  <h2 id="correcoes-title">Correções e histórico</h2>
+                  <p>Os dados só mudam após as assinaturas do administrador e do condutor.</p>
+                </div>
+                <button type="button" class="secondary-button" id="abrir-correcao" hidden>
+                  Corrigir ocorrência
+                </button>
+              </div>
+              <p id="correcao-status" role="status" aria-live="polite"></p>
+              <div id="correcao-historico"></div>
+              <form id="correcao-form" hidden>
+                <h3>Propor correção</h3>
+                <p>
+                  O condutor responsável permanece o mesmo. Confira os dados completos e justifique
+                  a alteração.
+                </p>
+                <fieldset id="correcao-campos">
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="correcao-veiculo">Veículo</label
+                      ><select id="correcao-veiculo" required></select>
+                    </div>
+                    <div class="field">
+                      <label for="correcao-setor">Setor</label
+                      ><select id="correcao-setor" required></select>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="correcao-saida">Data e horário de saída</label
+                      ><input id="correcao-saida" type="datetime-local" required />
+                    </div>
+                    <div class="field">
+                      <label for="correcao-chegada">Data e horário de chegada</label
+                      ><input id="correcao-chegada" type="datetime-local" required />
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="correcao-km-inicial">Km inicial</label
+                      ><input
+                        id="correcao-km-inicial"
+                        type="number"
+                        min="0"
+                        max="999999999.9"
+                        step="0.1"
+                        required
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="correcao-km-final">Km final</label
+                      ><input
+                        id="correcao-km-final"
+                        type="number"
+                        min="0"
+                        max="999999999.9"
+                        step="0.1"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <p class="field-hint">
+                    Datas e horários de Brasília. A distância será recalculada automaticamente.
+                  </p>
+                  <div class="field">
+                    <label for="correcao-itinerario">Itinerário</label
+                    ><textarea id="correcao-itinerario" maxlength="2000" required></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="correcao-passageiros">Passageiros (um por linha, opcional)</label
+                    ><textarea id="correcao-passageiros"></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="correcao-justificativa">Justificativa da correção</label
+                    ><textarea id="correcao-justificativa" maxlength="2000" required></textarea>
+                  </div>
+                </fieldset>
+                <div class="signature-section">
+                  <h3>Assinatura do administrador</h3>
+                  <p class="field-hint">
+                    Alterar qualquer campo limpa a assinatura. A proposta enviada fica vinculada a
+                    esta assinatura.
+                  </p>
+                  <div class="signature-pad">
+                    <canvas
+                      id="correcao-admin-canvas"
+                      tabindex="0"
+                      aria-label="Área de assinatura do administrador"
+                    ></canvas>
+                  </div>
+                  <div class="signature-actions">
+                    <button type="button" class="secondary-button" id="correcao-admin-limpar">
+                      Limpar assinatura</button
+                    ><button type="button" class="secondary-button" id="correcao-cancelar">
+                      Cancelar</button
+                    ><button type="submit" class="approve-button" id="correcao-enviar" disabled>
+                      Assinar e enviar ao condutor
+                    </button>
+                  </div>
+                </div>
+              </form>
+              <section
+                id="correcao-confirmacao"
+                class="signature-section"
+                hidden
+                aria-labelledby="correcao-confirmar-title"
+              >
+                <h3 id="correcao-confirmar-title">Confirmar correção proposta</h3>
+                <p>
+                  Confira a comparação acima. Sua assinatura confirma a justificativa e todos os
+                  dados propostos.
+                </p>
+                <label class="checkbox-field"
+                  ><input type="checkbox" id="correcao-concordo" />Conferi a proposta e concordo com
+                  a correção.</label
+                >
+                <div class="signature-pad">
+                  <canvas
+                    id="correcao-condutor-canvas"
+                    tabindex="0"
+                    aria-label="Área de assinatura do condutor para a correção"
+                  ></canvas>
+                </div>
+                <div class="signature-actions">
+                  <button type="button" class="secondary-button" id="correcao-condutor-limpar">
+                    Limpar assinatura</button
+                  ><button type="button" class="approve-button" id="correcao-confirmar" disabled>
+                    Assinar e aplicar correção
+                  </button>
+                </div>
+              </section>
+              <p id="correcao-erro" class="message" role="alert" hidden></p>
+            </section>
           </article>
         </section>
         <footer class="app-footer">Ocorrências diárias de transporte · Controle de Frotas</footer>

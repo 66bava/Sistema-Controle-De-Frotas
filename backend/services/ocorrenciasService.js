@@ -108,8 +108,19 @@ async function lerOcorrencia(id, usuario, incluirAssinatura = false) {
       'SELECT nome FROM passageiros WHERE ocorrencia_id=? ORDER BY id',
       [id]
     );
+    let correcoes = [];
+    if (incluirAssinatura) {
+      [correcoes] = await conn.execute(
+        "SELECT c.id,c.revisao_base,c.justificativa,c.aplicado_em,c.administrador_assinou_em,c.condutor_assinou_em,c.assinatura_administrador,c.assinatura_condutor,u.nome AS administrador FROM correcoes_ocorrencia c JOIN usuarios u ON u.id=c.administrador_id WHERE c.ocorrencia_id=? AND c.status='applied' ORDER BY c.id",
+        [id]
+      );
+    }
     await conn.commit();
-    return { ...publico(rows[0]), passageiros: passageiros.map((p) => p.nome) };
+    return {
+      ...publico(rows[0]),
+      passageiros: passageiros.map((p) => p.nome),
+      ...(incluirAssinatura ? { correcoes } : {}),
+    };
   } catch (error) {
     await conn.rollback();
     throw error;

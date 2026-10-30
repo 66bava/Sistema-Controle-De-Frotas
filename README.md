@@ -68,7 +68,7 @@ README.md        Apresentação do projeto
 
 Já estão implementados autenticação, aprovação de condutores, veículos, setores, registro e conclusão de viagens com assinatura, histórico, dashboard, PDF, impressão e Excel.
 
-Permanecem previstas a gestão completa de usuários, as correções administrativas com justificativa e duas assinaturas e a revisão final do sistema.
+Também estão implementadas a gestão de usuários (ativação, desativação e alteração de perfis) e as correções de viagens concluídas, com justificativa, duas assinaturas e preservação da versão anterior.
 
 ## Documentação complementar
 
@@ -76,3 +76,5 @@ Permanecem previstas a gestão completa de usuários, as correções administrat
 - [Mapa do código](docs/NAVEGACAO.md).
 - [Plano de desenvolvimento](docs/PLANO.md).
 - [Script completo do banco](sql/banco.sql) e [instruções do MySQL Workbench](sql/README.md).
+
+- [Roteiro de demonstração do MVP](docs/DEMONSTRACAO.md).

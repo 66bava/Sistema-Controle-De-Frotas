@@ -31,6 +31,28 @@ const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
 export function modeloDocumento(item, emitidoEm = new Date()) {
   const concluida = item.status === 'completed';
   return {
+    correcoes: (item.correcoes || []).map((c) => ({
+      id: c.id,
+      justificativa: c.justificativa,
+      info:
+        'Correção #' +
+        c.id +
+        ' · revisão ' +
+        c.revisao_base +
+        ' → ' +
+        (c.revisao_base + 1) +
+        ' · aplicada em ' +
+        datetime.format(new Date(c.aplicado_em)),
+      administradorInfo:
+        'Administrador: ' +
+        c.administrador +
+        ' · ' +
+        datetime.format(new Date(c.administrador_assinou_em)),
+      condutorInfo:
+        'Condutor: ' + item.condutor + ' · ' + datetime.format(new Date(c.condutor_assinou_em)),
+      assinatura_administrador: c.assinatura_administrador,
+      assinatura_condutor: c.assinatura_condutor,
+    })),
     codigo: item.codigo,
     revisao: item.revisao,
     concluida,

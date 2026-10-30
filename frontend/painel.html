@@ -186,6 +186,118 @@
             </table>
           </div>
         </section>
+        <section id="usuarios-panel" class="content-panel" hidden aria-labelledby="usuarios-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="usuarios-title">Acessos da equipe</h2>
+              <p>As alterações valem também para sessões já abertas.</p>
+            </div>
+            <button type="button" class="secondary-button" id="atualizar-usuarios">
+              Atualizar lista
+            </button>
+          </div>
+          <form id="usuarios-filtros" class="cadastro-filters">
+            <div class="field">
+              <label for="usuarios-busca">Buscar usuário</label
+              ><input
+                id="usuarios-busca"
+                name="busca"
+                maxlength="150"
+                type="search"
+                placeholder="Nome, e-mail, matrícula ou função"
+              />
+            </div>
+            <div class="field">
+              <label for="usuarios-perfil">Perfil</label
+              ><select id="usuarios-perfil" name="perfil">
+                <option value="">Todos</option>
+                <option value="driver">Condutor</option>
+                <option value="viewer">Consulta</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="usuarios-status">Status</label
+              ><select id="usuarios-status" name="status">
+                <option value="">Todos</option>
+                <option value="pending">Aguardando aprovação</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+              </select>
+            </div>
+            <button class="secondary-button" type="submit">Buscar usuários</button>
+          </form>
+          <p id="usuarios-info" role="status" aria-live="polite"></p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Nome / e-mail</th>
+                  <th scope="col">Matrícula</th>
+                  <th scope="col">Função</th>
+                  <th scope="col">Perfil</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="usuarios-lista"></tbody>
+            </table>
+          </div>
+          <div class="dialog-actions">
+            <button id="usuarios-anterior" class="secondary-button" type="button">Anterior</button
+            ><span id="usuarios-pagina"></span
+            ><button id="usuarios-proxima" class="secondary-button" type="button">Próxima</button>
+          </div>
+        </section>
+        <dialog class="cadastro-dialog" id="usuario-dialog" aria-labelledby="usuario-titulo">
+          <form id="usuario-form">
+            <h2 id="usuario-titulo">Alterar acesso</h2>
+            <p id="usuario-identificacao"></p>
+            <p id="usuario-erro" class="message" role="alert" hidden></p>
+            <div class="field-row">
+              <div class="field">
+                <label for="usuario-perfil">Perfil</label
+                ><select id="usuario-perfil">
+                  <option value="driver">Condutor</option>
+                  <option value="viewer">Consulta</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="usuario-status">Status</label
+                ><select id="usuario-status">
+                  <option value="active">Ativo</option>
+                  <option value="inactive">Inativo</option>
+                </select>
+              </div>
+            </div>
+            <p class="field-hint">
+              Desativar impede o acesso. Alterar o perfil modifica as permissões imediatamente. Os
+              registros de viagem são preservados.
+            </p>
+            <div class="dialog-actions">
+              <button type="button" class="secondary-button" id="usuario-cancelar">Cancelar</button
+              ><button type="submit" class="approve-button" id="usuario-salvar">
+                Confirmar alteração
+              </button>
+            </div>
+          </form>
+        </dialog>
+        <section
+          id="correcoes-panel"
+          class="content-panel"
+          hidden
+          aria-labelledby="pendencias-title"
+        >
+          <div class="panel-heading">
+            <h2 id="pendencias-title">Aguardando confirmação</h2>
+            <button type="button" id="atualizar-correcoes" class="secondary-button">
+              Atualizar correções
+            </button>
+          </div>
+          <p id="correcoes-status" role="status" aria-live="polite"></p>
+          <div id="correcoes-lista" class="dashboard-recentes"></div>
+        </section>
         <section id="inicio-panel" hidden aria-labelledby="resumo-title">
           <div class="panel-heading">
             <div>

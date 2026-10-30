@@ -151,3 +151,18 @@ Não implementar GPS, mapas, combustível, manutenção, IA ou funcionalidades f
 - Próxima etapa: gestão completa de usuários; correções com justificativa e duas assinaturas permanecem pendentes.
 
 - Validação: 43 testes de integração/interface e 27 unitários aprovados; formatação conferida. Banco de desenvolvimento preservado.
+
+## Conclusão das funcionalidades do MVP — 30/10/2026
+
+- Gestão de usuários com pesquisa, filtros, paginação, ativação/desativação e alteração de perfil autorizada pelo usuário.
+- Proteção transacional do último administrador ativo, verificação do acesso atual do administrador e bloqueio de mudanças que interromperiam viagem ou assinatura pendente.
+- Correções de viagens concluídas com justificativa, proposta assinada pelo administrador, comparação entre versões e confirmação assinada pelo condutor original.
+- Proposta imutável, uma pendência por ocorrência, revisão e hash canônico verificados; aplicação e auditoria atômicas.
+- Snapshot completo anterior, passageiros e assinatura preservados; histórico e imagens protegidos pelas permissões da API.
+- PDF e impressão incluem justificativa e assinaturas das correções aplicadas. Excel utiliza os dados vigentes.
+- Menu e atalhos atualizados, validação imediata dos campos e conferência da interface em 390, 768 e 1440 pixels.
+- README simplificado preservado; guia técnico, mapa do código e roteiro de demonstração atualizados. Dados de demonstração reproduzíveis pelos testes isolados e preparação manual descrita no roteiro.
+- Validação final: 46 testes de integração/interface e 29 unitários aprovados; teste integrado é ignorado na suíte unitária por ser executado separadamente. Formatação conferida e auditoria de dependências de produção sem vulnerabilidades.
+- Nenhuma alteração no schema ou no banco local de desenvolvimento. SQL completo original permanece suficiente.
+- Limite do fluxo de correções: propostas assinadas aguardam confirmação e não oferecem cancelamento ou rejeição no MVP.
+- Funcionalidades previstas para o MVP implementadas. Demonstração pessoal e publicação/entrega acadêmica ficam a cargo do estudante.

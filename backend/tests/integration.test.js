@@ -1178,6 +1178,252 @@ test(
         "UPDATE ocorrencias SET chegada_em=DATE_ADD(saida_em, INTERVAL 1 HOUR), km_final=km_inicial+10, assinatura_condutor=X'01', assinado_por=condutor_id, assinado_em=DATE_ADD(saida_em, INTERVAL 1 HOUR), status='completed' WHERE status='in_progress' AND condutor_id IN (?, ?, ?)",
         driversViagem.map((d) => d.id)
       );
+      await t.test(
+        'gestão de usuários: permissão, busca, ativação e sessão atualizada',
+        async () => {
+          for (const cookie of [driverA.cookie, 'frotas_sessao=' + gerarToken(viewer.insertId)])
+            assert.equal((await request('/usuarios', { cookie })).response.status, 403);
+          const list = await request('/usuarios?busca=Viewer', { cookie: adminCookie });
+          assert.equal(list.response.status, 200);
+          assert.equal(list.data.total, 1);
+          assert.equal(JSON.stringify(list.data).includes('senha_hash'), false);
+          const path = '/usuarios/' + viewer.insertId + '/acesso';
+          assert.equal(
+            (
+              await request(path, {
+                method: 'PUT',
+                cookie: adminCookie,
+                data: { perfil: 'driver', status: 'active' },
+              })
+            ).response.status,
+            200
+          );
+          assert.equal(
+            (
+              await request('/auth/sessao', {
+                cookie: 'frotas_sessao=' + gerarToken(viewer.insertId),
+              })
+            ).data.usuario.perfil,
+            'driver'
+          );
+          assert.equal(
+            (
+              await request(path, {
+                method: 'PUT',
+                cookie: adminCookie,
+                data: { perfil: 'viewer', status: 'inactive' },
+              })
+            ).response.status,
+            200
+          );
+          assert.equal(
+            (
+              await request('/auth/sessao', {
+                cookie: 'frotas_sessao=' + gerarToken(viewer.insertId),
+              })
+            ).response.status,
+            401
+          );
+          assert.equal(
+            (
+              await request(path, {
+                method: 'PUT',
+                cookie: adminCookie,
+                data: { perfil: 'viewer', status: 'active' },
+              })
+            ).response.status,
+            200
+          );
+          assert.equal(
+            (
+              await request('/usuarios/' + admin.insertId + '/acesso', {
+                method: 'PUT',
+                cookie: adminCookie,
+                data: { perfil: 'viewer', status: 'active' },
+              })
+            ).response.status,
+            409
+          );
+          const [[audit]] = await pool.execute(
+            "SELECT COUNT(*) AS n FROM auditoria WHERE acao='alterar_acesso' AND entidade_id=?",
+            [viewer.insertId]
+          );
+          assert.equal(Number(audit.n), 3);
+        }
+      );
+      await t.test(
+        'administradores concorrentes não removem o último acesso administrativo',
+        async () => {
+          const [extra] = await pool.execute(
+            "INSERT INTO usuarios(nome,email,senha_hash,perfil,status) VALUES ('Outro Admin','admin2@example.invalid',?,'admin','active')",
+            [hash]
+          );
+          const resultados = await Promise.all([
+            request('/usuarios/' + extra.insertId + '/acesso', {
+              method: 'PUT',
+              cookie: adminCookie,
+              data: { perfil: 'viewer', status: 'inactive' },
+            }),
+            request('/usuarios/' + admin.insertId + '/acesso', {
+              method: 'PUT',
+              cookie: 'frotas_sessao=' + gerarToken(extra.insertId),
+              data: { perfil: 'viewer', status: 'inactive' },
+            }),
+          ]);
+          assert.equal(resultados.filter((r) => r.response.status === 200).length, 1);
+          const [[ativos]] = await pool.query(
+            "SELECT COUNT(*) AS total FROM usuarios WHERE perfil='admin' AND status='active'"
+          );
+          assert.equal(Number(ativos.total), 1);
+          await pool.execute("UPDATE usuarios SET perfil='admin',status='active' WHERE id=?", [
+            admin.insertId,
+          ]);
+          await pool.execute("UPDATE usuarios SET perfil='viewer',status='inactive' WHERE id=?", [
+            extra.insertId,
+          ]);
+        }
+      );
+      await t.test(
+        'correção exige justificativa, administrador e assinatura válida sem alterar o original',
+        async () => {
+          const original = (await request('/ocorrencias/' + viagemId, { cookie: adminCookie })).data
+            .ocorrencia;
+          const path = '/ocorrencias/' + viagemId + '/correcoes';
+          const body = {
+            ...inicio,
+            chegada_em: '2026-10-30T01:00',
+            km_final: 129.5,
+            itinerario: 'Rota corrigida para conferência',
+            justificativa: 'Ajuste da leitura do hodômetro e do itinerário.',
+            revisao: original.revisao,
+            assinatura,
+          };
+          assert.equal(
+            (await request(path, { method: 'POST', cookie: driverA.cookie, data: body })).response
+              .status,
+            403
+          );
+          for (const delta of [
+            { justificativa: '' },
+            { assinatura: '' },
+            { km_final: 1 },
+            { condutor_id: driverB.id },
+            { revisao: 1 },
+          ])
+            assert.ok(
+              [409, 422].includes(
+                (
+                  await request(path, {
+                    method: 'POST',
+                    cookie: adminCookie,
+                    data: { ...body, ...delta },
+                  })
+                ).response.status
+              )
+            );
+          const results = await Promise.all(
+            [1, 2].map(() => request(path, { method: 'POST', cookie: adminCookie, data: body }))
+          );
+          assert.deepEqual(results.map((r) => r.response.status).sort(), [201, 409]);
+          const atual = (await request('/ocorrencias/' + viagemId, { cookie: driverA.cookie })).data
+            .ocorrencia;
+          assert.deepEqual(atual, original);
+          const historico = await request(path, { cookie: driverA.cookie });
+          const proposta = historico.data.correcoes[0];
+          assert.equal(proposta.status, 'pending');
+          assert.equal(proposta.dados_anteriores.assinatura_condutor, undefined);
+          assert.equal(proposta.dados_propostos.km_final, 129.5);
+          assert.equal((await request(path, { cookie: driverB.cookie })).response.status, 404);
+          const pendentes = await request('/ocorrencias/correcoes-pendentes', {
+            cookie: driverA.cookie,
+          });
+          assert.equal(pendentes.data.correcoes.length, 1);
+          assert.equal(
+            (await request('/ocorrencias/correcoes-pendentes', { cookie: driverB.cookie })).data
+              .correcoes.length,
+            0
+          );
+          assert.equal(
+            (
+              await request('/usuarios/' + driverA.id + '/acesso', {
+                method: 'PUT',
+                cookie: adminCookie,
+                data: { perfil: 'viewer', status: 'active' },
+              })
+            ).response.status,
+            409
+          );
+          const confirmPath = path + '/' + proposta.id + '/confirmar';
+          const confirm = {
+            assinatura,
+            revisao: proposta.revisao_base,
+            conteudo_sha256: proposta.conteudo_sha256,
+          };
+          assert.equal(
+            (await request(confirmPath, { method: 'POST', cookie: adminCookie, data: confirm }))
+              .response.status,
+            404
+          );
+          assert.equal(
+            (await request(confirmPath, { method: 'POST', cookie: driverB.cookie, data: confirm }))
+              .response.status,
+            404
+          );
+          assert.equal(
+            (
+              await request(confirmPath, {
+                method: 'POST',
+                cookie: driverA.cookie,
+                data: { ...confirm, conteudo_sha256: '0'.repeat(64) },
+              })
+            ).response.status,
+            409
+          );
+          const applied = await Promise.all(
+            [1, 2].map(() =>
+              request(confirmPath, { method: 'POST', cookie: driverA.cookie, data: confirm })
+            )
+          );
+          assert.deepEqual(applied.map((r) => r.response.status).sort(), [200, 409]);
+          const corrigida = (await request('/ocorrencias/' + viagemId, { cookie: driverA.cookie }))
+            .data.ocorrencia;
+          assert.equal(corrigida.revisao, original.revisao + 1);
+          assert.equal(corrigida.km_final, 129.5);
+          assert.equal(corrigida.distancia_km, 29);
+          assert.equal(corrigida.itinerario, body.itinerario);
+          const [[saved]] = await pool.execute(
+            'SELECT dados_anteriores,status,assinatura_administrador,assinatura_condutor FROM correcoes_ocorrencia WHERE id=?',
+            [proposta.id]
+          );
+          assert.equal(saved.status, 'applied');
+          assert.ok(saved.assinatura_administrador.length);
+          assert.ok(saved.assinatura_condutor.length);
+          const before =
+            typeof saved.dados_anteriores === 'string'
+              ? JSON.parse(saved.dados_anteriores)
+              : saved.dados_anteriores;
+          assert.equal(before.km_final, original.km_final);
+          assert.ok(before.assinatura_condutor);
+          for (const parte of ['administrador', 'condutor', 'anterior']) {
+            const url = base + '/api' + path + '/' + proposta.id + '/assinatura/' + parte;
+            assert.equal((await fetch(url, { headers: { Cookie: driverA.cookie } })).status, 200);
+            assert.equal((await fetch(url, { headers: { Cookie: driverB.cookie } })).status, 404);
+          }
+          const html = await fetch(base + '/api/ocorrencias/' + viagemId + '/impressao', {
+            headers: { Cookie: adminCookie },
+          });
+          assert.match(await html.text(), /Correção administrativa/);
+          const pdf = await fetch(base + '/api/ocorrencias/' + viagemId + '/pdf', {
+            headers: { Cookie: adminCookie },
+          });
+          assert.equal(pdf.status, 200);
+          const [[audits]] = await pool.execute(
+            "SELECT COUNT(*) AS n FROM auditoria WHERE correcao_id=? AND acao IN ('propor_correcao','aplicar_correcao')",
+            [proposta.id]
+          );
+          assert.equal(Number(audits.n), 2);
+        }
+      );
       await t.test('dashboard: contagens, fuso, recentes e isolamento por perfil', async () => {
         assert.equal((await request('/dashboard')).response.status, 401);
         for (const [id, perfil] of [
@@ -1572,6 +1818,111 @@ test(
             });
             await expect(popup.locator('.print-toolbar')).not.toBeVisible();
             await popup.close();
+            // Exercita gestão de acesso e correção com duas sessões reais.
+            const viagemBrowserId = new URL(page.url()).searchParams.get('id');
+            async function entrarComo(email) {
+              await abrirMenu();
+              await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+              await page.waitForURL(base + '/');
+              await page.locator('#login-email').fill(email);
+              await page.locator('#login-senha').fill(senha);
+              await page.getByRole('button', { name: 'Entrar na conta', exact: true }).click();
+              await page.waitForURL('**/painel.html');
+            }
+            async function desenhar(selector) {
+              await page.locator(selector).scrollIntoViewIfNeeded();
+              const b = await page.locator(selector).boundingBox();
+              await page.mouse.move(b.x + 20, b.y + 80);
+              await page.mouse.down();
+              for (let i = 1; i < 30; i++)
+                await page.mouse.move(b.x + 20 + i * 5, b.y + 80 + Math.sin(i / 2) * 22);
+              await page.mouse.up();
+            }
+            await entrarComo('admin@example.invalid');
+            await navegar('usuarios');
+            await page.locator('#usuarios-busca').fill('Viewer Teste');
+            await page.getByRole('button', { name: 'Buscar usuários', exact: true }).click();
+            await page
+              .getByRole('button', { name: 'Alterar acesso de Viewer Teste', exact: true })
+              .click();
+            await page.locator('#usuario-status').selectOption('inactive');
+            await page.getByRole('button', { name: 'Confirmar alteração', exact: true }).click();
+            await expect(page.locator('#usuarios-lista')).toContainText('Inativo');
+            await page
+              .getByRole('button', { name: 'Alterar acesso de Viewer Teste', exact: true })
+              .click();
+            await page.locator('#usuario-status').selectOption('active');
+            await page.getByRole('button', { name: 'Confirmar alteração', exact: true }).click();
+            await expect(page.locator('#usuarios-lista')).toContainText('Ativo');
+            await page.setViewportSize({ width: 1440, height: 1000 });
+            await page.screenshot({ path: 'test-results/usuarios-desktop.png', fullPage: true });
+            await page.goto(base + '/ocorrencias.html?id=' + viagemBrowserId);
+            await page.getByRole('button', { name: 'Corrigir ocorrência', exact: true }).click();
+            await expect(page.locator('#correcao-form')).toBeVisible();
+            await page.locator('#correcao-km-final').fill('52420');
+            await page
+              .locator('#correcao-justificativa')
+              .fill('Conferência demonstrativa da leitura final.');
+            await desenhar('#correcao-admin-canvas');
+            await expect(page.locator('#correcao-enviar')).toBeEnabled();
+            await page
+              .locator('#correcao-justificativa')
+              .fill('Conferência demonstrativa da leitura final do hodômetro.');
+            await expect(page.locator('#correcao-enviar')).toBeDisabled();
+            await desenhar('#correcao-admin-canvas');
+            const invalidos = await page.locator('#correcao-form').evaluate((f) =>
+              Array.from(f.elements)
+                .filter((el) => el.willValidate && !el.validity.valid)
+                .map((el) => ({ id: el.id, mensagem: el.validationMessage, valor: el.value }))
+            );
+            assert.deepEqual(invalidos, []);
+            const propostaResponse = page.waitForResponse(
+              (r) => r.url().endsWith('/correcoes') && r.request().method() === 'POST'
+            );
+            await page.locator('#correcao-enviar').click();
+            const respostaProposta = await propostaResponse;
+            assert.equal(respostaProposta.status(), 201, await respostaProposta.text());
+            await expect(page.locator('#correcao-status')).toContainText('aguardando');
+            await page.screenshot({ path: 'test-results/correcao-admin.png', fullPage: true });
+            await entrarComo('browser@example.invalid');
+            await navegar('correcoes');
+            await expect(page.locator('#correcoes-lista')).toContainText(
+              'Conferência demonstrativa'
+            );
+            await page.locator('#correcoes-lista a').first().click();
+            await expect(page.locator('#correcao-confirmacao')).toBeVisible();
+            await expect(page.locator('#correcao-historico')).toContainText('52.420');
+            for (const width of [390, 768, 1440]) {
+              await page.setViewportSize({ width, height: 1000 });
+              assert.equal(
+                await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+                true
+              );
+            }
+            await page.setViewportSize({ width: 390, height: 844 });
+            await expect
+              .poll(async () => {
+                const b = await page.locator('#sidebar').boundingBox();
+                return b.x + b.width <= 1;
+              })
+              .toBe(true);
+            await page.screenshot({ path: 'test-results/correcao-mobile.png', fullPage: true });
+            await desenhar('#correcao-condutor-canvas');
+            await expect(page.locator('#correcao-confirmar')).toBeDisabled();
+            await page.locator('#correcao-concordo').check();
+            await page.locator('#correcao-confirmar').click();
+            await expect(page.locator('#feedback')).toContainText('Correção aplicada');
+            await expect(page.locator('#detalhe-dados')).toContainText('52.420');
+            await expect(page.locator('#correcao-historico')).toContainText('Aplicada');
+            await page.locator('.correcao-registro > summary').click();
+            await page
+              .getByText('Consultar assinatura da versão anterior', { exact: true })
+              .click();
+            await expect(page.locator('img[alt="Assinatura original preservada"]')).toBeVisible();
+            await page.screenshot({
+              path: 'test-results/correcao-aplicada-mobile.png',
+              fullPage: true,
+            });
             assert.deepEqual(errors, []);
           } finally {
             await browser.close();

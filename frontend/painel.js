@@ -1,5 +1,7 @@
 import { iniciarNavegacao, atalhosInicio } from './navegacao.js';
 import { iniciarDashboard } from './dashboard.js';
+import { iniciarUsuarios } from './usuarios.js';
+import { iniciarPendencias } from './correcoesPendentes.js';
 import { iniciarCadastros } from './cadastros.js';
 import { api, feedback } from './api.js';
 const body = document.querySelector('#pendentes');
@@ -96,7 +98,9 @@ try {
       : 'Seu ponto de partida para acompanhar os trajetos.';
   const solicitada = new URLSearchParams(window.location.search).get('secao');
   const secao =
-    usuario.perfil === 'admin' && ['aprovacoes', 'veiculos', 'setores'].includes(solicitada)
+    solicitada === 'correcoes' ||
+    (usuario.perfil === 'admin' &&
+      ['aprovacoes', 'usuarios', 'veiculos', 'setores'].includes(solicitada))
       ? solicitada
       : 'inicio';
   iniciarNavegacao(usuario, secao);
@@ -104,6 +108,13 @@ try {
     document.querySelector('#inicio-panel').hidden = false;
     atalhosInicio(usuario);
     await iniciarDashboard(usuario);
+  }
+  if (secao === 'correcoes') {
+    document.querySelector('#correcoes-panel').hidden = false;
+    document.querySelector('#boas-vindas').textContent = 'Correções pendentes';
+    document.querySelector('#introducao').textContent =
+      'Confira as propostas que aguardam a assinatura do condutor.';
+    await iniciarPendencias();
   }
   if (usuario.perfil === 'admin') {
     const loads = iniciarCadastros();
@@ -113,7 +124,13 @@ try {
       document.querySelector('#introducao').textContent =
         'Confira os cadastros e libere o acesso da equipe.';
       await carregarPendentes();
-    } else if (secao !== 'inicio') {
+    } else if (secao === 'usuarios') {
+      document.querySelector('#usuarios-panel').hidden = false;
+      document.querySelector('#boas-vindas').textContent = 'Usuários';
+      document.querySelector('#introducao').textContent =
+        'Gerencie os perfis e os acessos da equipe.';
+      await iniciarUsuarios(usuario);
+    } else if (['veiculos', 'setores'].includes(secao)) {
       document.getElementById(secao + '-panel').hidden = false;
       document.querySelector('#boas-vindas').textContent =
         secao === 'veiculos' ? 'Veículos' : 'Setores';

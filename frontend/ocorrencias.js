@@ -1,3 +1,4 @@
+import { montarCorrecoes } from './correcoes.js';
 import { configurarDocumentos } from './documentos.js';
 import { criarHistorico } from './historico.js';
 import { iniciarNavegacao, selecionarNavegacao } from './navegacao.js';
@@ -8,7 +9,8 @@ let usuario,
   historico,
   viagemAtual = null,
   enviando = false,
-  limparFinalizacao = () => {};
+  limparFinalizacao = () => {},
+  limparCorrecoes = () => {};
 const dataLocal = new Intl.DateTimeFormat('pt-BR', {
   timeZone: 'America/Sao_Paulo',
   dateStyle: 'short',
@@ -96,6 +98,11 @@ async function detalhe(id) {
     q('#detalhe-passageiros').append(li);
   }
   q('#sem-passageiros').hidden = Boolean(item.passageiros.length);
+  limparCorrecoes();
+  limparCorrecoes = await montarCorrecoes(item, usuario, async () => {
+    await listar();
+    await detalhe(item.id);
+  });
   limparFinalizacao();
   limparFinalizacao = montarFinalizacao(item, usuario, async (id, mensagem) => {
     await listar();

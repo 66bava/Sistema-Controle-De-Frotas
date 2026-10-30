@@ -32,7 +32,7 @@ Gerar PDF e Imprimir estão disponíveis nos detalhes de cada ocorrência, com l
 
 Exportar Excel está disponível no histórico do administrador, utilizando todos os resultados dos filtros aplicados, independentemente da página visível. Datas/horários e quilômetros são gravados com tipos e formatos próprios do Excel.
 
-Ainda pendentes: correções administrativas com duas assinaturas, dashboard e gestão completa de usuários além da aprovação. Não há métricas ou viagens fictícias apresentadas como dados reais.
+Implementados também: dashboard, gestão de usuários e correções de ocorrências concluídas com justificativa e duas assinaturas. Os dados apresentados vêm do MySQL.
 
 ## Perfis
 
@@ -140,7 +140,7 @@ Se o Windows bloquear scripts locais, executar a rotina com liberação apenas p
 
 ## Regras confirmadas das viagens
 
-Viagens podem terminar no dia seguinte. Veículo e condutor só podem ter uma ocorrência em andamento; é necessário concluir e assinar a anterior antes de outra. Correções exigem justificativa e assinaturas do administrador e do condutor, preservando a versão anterior. Início, chegada e conclusão já estão integrados ao MySQL. O fluxo de correção com duas assinaturas continua pendente.
+Viagens podem terminar no dia seguinte. Veículo e condutor só podem ter uma ocorrência em andamento; é necessário concluir e assinar a anterior antes de outra. Correções exigem justificativa e assinaturas do administrador e do condutor, preservando a versão anterior. Início, chegada e conclusão já estão integrados ao MySQL. O fluxo de correção com duas assinaturas está implementado conforme a seção abaixo.
 
 ## Entregas e GitHub
 
@@ -255,3 +255,28 @@ A consulta lê ocorrências e todos os passageiros associados no mesmo snapshot 
 Geração com [ExcelJS](https://github.com/exceljs/exceljs). package-lock.json e override da dependência transitiva uuid mantêm a versão corrigida compatível; instalação auditada sem vulnerabilidades reportadas.
 
 Validação em 30/10/2026: testes de dados, tipos, formatação, textos literais e arquivo vazio aprovados. Integração MySQL isolada confirmou todos os registros filtrados além da página atual, filtros combinados, passageiros completos, pendências e permissões. Chrome confirmou download administrativo, bloqueio quando há filtros não aplicados e ausência da ação para condutor. Exemplos fictícios em backend/test-results/modelo-exportacao.xlsx e exportacao-filtrada.xlsx, ignorados pelo Git. Sem mudança no schema ou nos dados de desenvolvimento.
+
+## Gestão de usuários
+
+A seção Usuários permite pesquisar por nome, e-mail, matrícula e função, filtrar por perfil/status e navegar por páginas de 20 contas. Somente administradores ativos podem consultar a lista e alterar acessos.
+
+- GET /api/usuarios: busca, perfil, status e pagina opcionais.
+- PUT /api/usuarios/:id/acesso: perfil (driver/viewer/admin) e status (active/inactive).
+
+Cadastros pendentes passam primeiro pela aprovação existente. Alterações ficam na auditoria. As permissões são consultadas no banco a cada requisição, incluindo sessões já abertas. O administrador não altera o próprio acesso, e o último administrador ativo é protegido dentro da transação. Viagens em andamento e correções aguardando o condutor bloqueiam alterações que interromperiam esse fluxo.
+
+## Correções com duas assinaturas
+
+No detalhe de uma viagem concluída, outro administrador pode propor a correção do veículo, setor, horários, quilômetros, itinerário e passageiros, informando a justificativa e assinando a proposta. O condutor original permanece responsável e precisa estar ativo. Veículo e setor inativos podem permanecer quando já eram os originais; novas seleções precisam estar ativas.
+
+A proposta é imutável depois do envio. Uma ocorrência aceita apenas uma proposta pendente por vez. Enquanto o condutor não concordar e assinar, nenhum dado do registro atual muda. O condutor encontra a proposta em Correções pendentes, confere a comparação entre as versões e assina. O MVP não oferece edição, cancelamento ou rejeição de proposta já assinada; divergências devem ser resolvidas entre as partes antes da confirmação.
+
+A aplicação ocorre em transação: substitui os campos e a assinatura atual do condutor, incrementa a revisão, registra a segunda assinatura e mantém o snapshot anterior completo, incluindo passageiros e assinatura original. Um hash SHA-256 canônico vincula proposta, justificativa, revisão e participantes; revisão/hash divergentes e confirmações repetidas são rejeitados. A assinatura continua sendo de protótipo, sem certificação digital.
+
+- GET /api/ocorrencias/correcoes-pendentes: fila de até 200 propostas; condutor vê somente as próprias.
+- GET /api/ocorrencias/:id/correcoes: histórico completo autorizado.
+- POST /api/ocorrencias/:id/correcoes: proposta assinada pelo administrador.
+- POST /api/ocorrencias/:id/correcoes/:correcaoId/confirmar: assinatura e confirmação pelo condutor original.
+- GET /api/ocorrencias/:id/correcoes/:correcaoId/assinatura/:parte: imagem protegida (administrador, condutor ou anterior).
+
+PDF e impressão usam os dados vigentes e incluem justificativas e assinaturas das correções aplicadas. Excel exporta os dados vigentes. O histórico anterior pode ser consultado no detalhe. Não há alteração no schema: a tabela de correções já existe no banco completo original.

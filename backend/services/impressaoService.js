@@ -37,7 +37,32 @@ export function gerarHtmlImpressao(doc) {
       : '<div class="pending-signature" aria-hidden="true"></div>') +
     '<p>' +
     e(doc.assinaturaInfo) +
-    '</p></section><footer class="document-footer"><div><span>' +
+    '</p></section>' +
+    (doc.correcoes || [])
+      .map(
+        (c) =>
+          '<section class="document-section"><h2>Correção administrativa</h2><p>' +
+          e(c.info) +
+          '</p><p>Justificativa: ' +
+          e(c.justificativa) +
+          '</p>' +
+          [
+            [c.administradorInfo, c.assinatura_administrador],
+            [c.condutorInfo, c.assinatura_condutor],
+          ]
+            .map(
+              ([info, img]) =>
+                '<div class="document-signature"><p>' +
+                e(info) +
+                '</p><div class="signature-image"><img src="data:image/png;base64,' +
+                img.toString('base64') +
+                '" alt="Assinatura vinculada à correção"></div></div>'
+            )
+            .join('') +
+          '</section>'
+      )
+      .join('') +
+    '<footer class="document-footer"><div><span>' +
     e(doc.codigo) +
     ' · Revisão ' +
     e(doc.revisao) +

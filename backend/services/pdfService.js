@@ -222,6 +222,30 @@ export function gerarPdf(modelo) {
         text(line, x, y, { size: 8, color: cor.textoSecundario });
         y += 12;
       }
+      for (const c of modelo.correcoes || []) {
+        y += 20;
+        heading('Correção administrativa');
+        for (const value of [c.info, 'Justificativa: ' + c.justificativa])
+          for (const line of linhas(value, width, 9)) {
+            ensure(13);
+            text(line, x, y, { size: 9 });
+            y += 13;
+          }
+        for (const [info, imagem] of [
+          [c.administradorInfo, c.assinatura_administrador],
+          [c.condutorInfo, c.assinatura_condutor],
+        ]) {
+          const infoLinhas = linhas(info, width, 8);
+          ensure(100 + infoLinhas.length * 12);
+          y += 10;
+          for (const line of infoLinhas) {
+            text(line, x, y, { size: 8 });
+            y += 12;
+          }
+          doc.image(imagem, x, y, { fit: [width, 75], align: 'left' });
+          y += 85;
+        }
+      }
       const range = doc.bufferedPageRange();
       for (let p = 0; p < range.count; p++) {
         doc.switchToPage(p);

@@ -63,3 +63,9 @@ backend/node_modules contém as dependências instaladas. backend/test-results c
 ## Dashboard
 
 [Interface](../frontend/dashboard.js) → [rota](../backend/routes/dashboardRoutes.js) → [controller](../backend/controllers/dashboardController.js) → [consulta MySQL](../backend/services/dashboardService.js).
+
+## Gestão de usuários e correções
+
+- Usuários: [interface](../frontend/usuarios.js), [rotas](../backend/routes/usuariosRoutes.js), [controller](../backend/controllers/usuariosController.js), [regras](../backend/services/usuariosService.js), [validação](../backend/utils/validacaoUsuarios.js).
+- Correções: [detalhe e assinatura](../frontend/correcoes.js), [fila](../frontend/correcoesPendentes.js), [rotas das ocorrências](../backend/routes/ocorrenciasRoutes.js), [controller](../backend/controllers/correcoesController.js), [transações e snapshots](../backend/services/correcoesService.js), [validação](../backend/utils/validacaoCorrecao.js).
+- [Roteiro da apresentação](DEMONSTRACAO.md).

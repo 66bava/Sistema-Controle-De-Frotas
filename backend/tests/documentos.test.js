@@ -202,3 +202,67 @@ test('HTML de impressão escapa dados e mantém assinatura como imagem, sem scri
   assert.ok(html.includes('data:image/png;base64,'));
   assert.ok(html.includes('/documento.css'));
 });
+
+test('PDF de correção preserva justificativa longa, duas assinaturas e limites A4', async () => {
+  const imagem = assinatura();
+  const model = modeloDocumento({
+    ...item,
+    assinatura_condutor: imagem,
+    correcoes: [
+      {
+        id: 1,
+        revisao_base: 3,
+        administrador: 'Administrador Demonstração',
+        justificativa:
+          'INICIO-JUSTIFICATIVA ' +
+          'Conferência dos dados registrados na viagem. '.repeat(60).slice(0, 1900) +
+          ' FIM-JUSTIFICATIVA',
+        aplicado_em: new Date('2026-10-30T06:00:00Z'),
+        administrador_assinou_em: new Date('2026-10-30T05:00:00Z'),
+        condutor_assinou_em: new Date('2026-10-30T06:00:00Z'),
+        assinatura_administrador: imagem,
+        assinatura_condutor: imagem,
+      },
+    ],
+  });
+  const buffer = await gerarPdf(model);
+  const { lib, documento, encerrar } = await abrir(buffer);
+  try {
+    const content = await texto(documento);
+    for (const value of [
+      'Correção administrativa',
+      'INICIO-JUSTIFICATIVA',
+      'FIM-JUSTIFICATIVA',
+      'Administrador Demonstração',
+      'Condutor: Ana Silva',
+    ])
+      assert.ok(
+        content.toLocaleLowerCase('pt-BR').includes(value.toLocaleLowerCase('pt-BR')),
+        value
+      );
+    let imagens = 0;
+    for (let i = 1; i <= documento.numPages; i++) {
+      const page = await documento.getPage(i);
+      const ops = await page.getOperatorList();
+      imagens += ops.fnArray.filter((x) => x === lib.OPS.paintImageXObject).length;
+      const textos = await page.getTextContent();
+      for (const t of textos.items) {
+        if (!t.str.trim()) continue;
+        assert.ok(t.transform[4] >= 38 && t.transform[4] + t.width <= page.view[2] - 35, t.str);
+        assert.ok(t.transform[5] >= 12 && t.transform[5] <= page.view[3] - 25, t.str);
+      }
+    }
+    assert.ok(imagens >= 3);
+    await mkdir('test-results', { recursive: true });
+    await writeFile('test-results/ocorrencia-corrigida.pdf', buffer);
+    await renderizar(documento, lib, documento.numPages, 'test-results/pdf-correcao-preview.png');
+    const html = gerarHtmlImpressao({
+      ...model,
+      correcoes: model.correcoes.map((c) => ({ ...c, justificativa: '<script>teste</script>' })),
+    });
+    assert.ok(html.includes('&lt;script&gt;teste&lt;/script&gt;'));
+    assert.ok(!html.includes('<script>teste'));
+  } finally {
+    await encerrar();
+  }
+});

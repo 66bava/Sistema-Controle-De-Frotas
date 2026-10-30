@@ -1,0 +1,15 @@
+{
+  "breadcrumbs.enabled": true,
+  "editor.stickyScroll.enabled": true,
+  "explorer.compactFolders": false,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/test-results": true,
+    "**/playwright-report": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/test-results": true,
+    "**/playwright-report": true
+  }
+}

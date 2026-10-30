@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101212" />
+    <title>Viagens · Controle de Frotas</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="ocorrencias.js"></script>
+  </head>
+  <body class="app-layout">
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+    <aside class="sidebar" id="sidebar" aria-label="Menu principal" aria-hidden="true" inert>
+      <div class="sidebar-brand">
+        <a class="brand" href="/painel.html"
+          ><svg class="brand-symbol" viewBox="0 0 36 36" aria-hidden="true">
+            <rect width="36" height="36" rx="10" />
+            <path d="M10 25V11h16M10 18h12" /></svg
+          ><span>Controle<br />de Frotas</span></a
+        ><button
+          class="sidebar-close"
+          id="fechar-menu"
+          type="button"
+          aria-label="Fechar menu de navegação"
+        >
+          ×
+        </button>
+      </div>
+      <p class="sidebar-caption">TRANSPORTE DIÁRIO</p>
+      <nav id="sidebar-links" aria-label="Navegação principal"></nav>
+      <div class="sidebar-account">
+        <span class="account-avatar" id="menu-avatar" aria-hidden="true">F</span>
+        <div><strong id="menu-nome">Carregando…</strong><span id="perfil"></span></div>
+      </div>
+      <button id="sair" class="sidebar-logout" type="button">
+        <span aria-hidden="true">↪</span>Sair da conta
+      </button>
+    </aside>
+    <button
+      type="button"
+      id="menu-overlay"
+      class="menu-overlay"
+      aria-label="Fechar menu"
+      tabindex="-1"
+      hidden
+    ></button>
+    <div class="app-content">
+      <header class="app-header">
+        <div class="mobile-header">
+          <button
+            id="abrir-menu"
+            class="menu-toggle"
+            type="button"
+            disabled
+            aria-label="Abrir menu de navegação"
+            aria-controls="sidebar"
+            aria-expanded="false"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 6h16M4 12h16M4 18h16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+              /></svg
+            >Menu</button
+          ><span class="header-location" id="header-location">Início</span>
+        </div>
+        <span class="header-app-name">Controle de Frotas</span>
+      </header>
+      <main class="workspace" id="conteudo" tabindex="-1">
+        <div class="eyebrow"><span class="dot"></span>Ocorrências de transporte</div>
+        <div class="trip-heading">
+          <div>
+            <h1 id="page-title">Minhas viagens</h1>
+            <p class="workspace-intro" id="page-subtitle">Carregando seus registros.</p>
+          </div>
+          <a class="approve-button button-link" id="nova-viagem" href="?nova=1" hidden
+            >Nova viagem</a
+          >
+        </div>
+        <div class="message" id="feedback" role="status" aria-live="polite" hidden></div>
+        <section id="lista-view" hidden aria-labelledby="historico-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="historico-title">Histórico de viagens</h2>
+              <p>Pesquise e acompanhe os registros de transporte.</p>
+            </div>
+            <div class="history-toolbar">
+              <button type="button" class="secondary-button" id="atualizar-viagens">
+                Atualizar</button
+              ><button type="button" class="approve-button" id="exportar-excel" hidden disabled>
+                Exportar Excel
+              </button>
+            </div>
+          </div>
+          <div class="current-trip" id="viagem-em-andamento" hidden>
+            <div>
+              <strong id="viagem-atual-codigo"></strong>
+              <p>Conclua a viagem atual antes de iniciar outra.</p>
+            </div>
+            <a id="abrir-viagem-atual" class="approve-button button-link" href="?"
+              >Registrar chegada ou assinar</a
+            >
+          </div>
+          <form id="historico-form" class="history-filters">
+            <div class="field">
+              <label for="historico-busca">Pesquisar viagens</label
+              ><input
+                id="historico-busca"
+                name="busca"
+                type="search"
+                maxlength="150"
+                placeholder="Código, placa, condutor, itinerário ou passageiro"
+                autocomplete="off"
+              />
+            </div>
+            <details id="historico-mais-filtros" open>
+              <summary>
+                Filtrar por período, veículo e status <span id="historico-filtros-ativos"></span>
+              </summary>
+              <div class="history-filter-grid">
+                <div class="field">
+                  <label for="historico-data-inicial">Data inicial de saída</label
+                  ><input id="historico-data-inicial" name="data_inicial" type="date" />
+                </div>
+                <div class="field">
+                  <label for="historico-data-final">Data final de saída</label
+                  ><input id="historico-data-final" name="data_final" type="date" />
+                </div>
+                <div class="field">
+                  <label for="historico-veiculo">Veículo</label
+                  ><select id="historico-veiculo" name="veiculo_id">
+                    <option value="">Todos os veículos</option>
+                  </select>
+                </div>
+                <div class="field" id="historico-condutor-group">
+                  <label for="historico-condutor">Condutor</label
+                  ><select id="historico-condutor" name="condutor_id">
+                    <option value="">Todos os condutores</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="historico-setor">Setor</label
+                  ><select id="historico-setor" name="setor_id">
+                    <option value="">Todos os setores</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="historico-status">Status</label
+                  ><select id="historico-status" name="status">
+                    <option value="">Todos os status</option>
+                    <option value="in_progress">Em andamento</option>
+                    <option value="completed">Concluída</option>
+                  </select>
+                </div>
+              </div>
+              <p class="field-hint">
+                Período pela data de saída, no horário de Brasília. Inclui o dia final inteiro.
+              </p>
+            </details>
+            <div class="history-filter-actions">
+              <button class="approve-button" id="historico-aplicar" type="submit">
+                Aplicar filtros</button
+              ><button class="secondary-button" id="historico-limpar" type="button">
+                Limpar filtros
+              </button>
+            </div>
+          </form>
+          <p
+            id="excel-info"
+            class="field-hint export-note"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></p>
+          <div class="history-results-heading">
+            <p id="lista-info" role="status" aria-live="polite"></p>
+            <div class="history-page-size">
+              <label for="historico-limite">Por página</label
+              ><select id="historico-limite">
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+          <div class="history-table table-wrap">
+            <table>
+              <caption class="visually-hidden">
+                Histórico de viagens conforme os filtros aplicados
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Código</th>
+                  <th scope="col">Data de saída</th>
+                  <th scope="col">Veículo</th>
+                  <th scope="col">Condutor</th>
+                  <th scope="col">Saída</th>
+                  <th scope="col">Chegada</th>
+                  <th scope="col">Distância</th>
+                  <th scope="col">Setor</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody id="historico-tabela"></tbody>
+            </table>
+          </div>
+          <div class="trip-list history-cards" id="viagens-lista"></div>
+          <nav class="history-pagination" aria-label="Paginação do histórico">
+            <button type="button" class="secondary-button" id="historico-anterior" disabled>
+              ← Anterior</button
+            ><span id="historico-pagina" aria-live="polite"></span
+            ><button type="button" class="secondary-button" id="historico-proxima" disabled>
+              Próxima →
+            </button>
+          </nav>
+        </section>
+        <section
+          id="nova-view"
+          class="content-panel trip-form-panel"
+          hidden
+          aria-labelledby="nova-title"
+        >
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Etapa 01 · Saída</p>
+              <h2 id="nova-title">Registrar saída</h2>
+            </div>
+            <a class="text-button button-link" href="/ocorrencias.html">Voltar</a>
+          </div>
+          <form id="nova-form">
+            <fieldset id="campos-viagem" disabled>
+              <div class="field">
+                <label for="viagem-condutor">Condutor</label
+                ><input id="viagem-condutor" readonly aria-describedby="condutor-hint" />
+                <p id="condutor-hint" class="field-hint">A viagem ficará vinculada à sua conta.</p>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="viagem-veiculo">Veículo</label
+                  ><select id="viagem-veiculo" required>
+                    <option value="">Selecione um veículo</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="viagem-setor">Setor</label
+                  ><select id="viagem-setor" required>
+                    <option value="">Selecione um setor</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="viagem-saida">Data e horário de saída</label
+                  ><input
+                    id="viagem-saida"
+                    type="datetime-local"
+                    required
+                    aria-describedby="saida-hint"
+                  />
+                  <p class="field-hint" id="saida-hint">Horário de Brasília.</p>
+                </div>
+                <div class="field">
+                  <label for="viagem-km">Quilometragem inicial</label
+                  ><input
+                    id="viagem-km"
+                    type="number"
+                    min="0"
+                    max="999999999.9"
+                    step="0.1"
+                    inputmode="decimal"
+                    placeholder="Ex.: 52381"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label for="viagem-itinerario">Itinerário</label
+                ><textarea
+                  id="viagem-itinerario"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Ex.: Sede → cliente → sede"
+                  required
+                ></textarea>
+              </div>
+              <div class="field">
+                <label for="viagem-passageiros"
+                  >Passageiros <span class="field-hint">(opcional)</span></label
+                ><textarea
+                  id="viagem-passageiros"
+                  rows="3"
+                  maxlength="7550"
+                  placeholder="Um nome por linha"
+                  aria-describedby="passageiros-hint"
+                ></textarea>
+                <p class="field-hint" id="passageiros-hint">
+                  Não é necessário que os passageiros tenham conta no sistema.
+                </p>
+              </div>
+              <div class="dialog-actions">
+                <a class="secondary-button button-link" href="/ocorrencias.html">Cancelar</a
+                ><button class="approve-button" id="iniciar-viagem" type="submit">
+                  Registrar saída
+                </button>
+              </div>
+            </fieldset>
+          </form>
+        </section>
+        <section id="detalhe-view" hidden aria-labelledby="detalhe-title">
+          <a class="text-button button-link" id="voltar-registros" href="/ocorrencias.html"
+            >← Voltar aos registros</a
+          >
+          <article class="content-panel trip-detail">
+            <div class="panel-heading">
+              <div>
+                <p class="section-label">Registro da viagem</p>
+                <h2 id="detalhe-title"></h2>
+              </div>
+              <span id="detalhe-status" class="status-badge"></span>
+            </div>
+            <div class="document-actions" aria-label="Documentos da ocorrência">
+              <button type="button" class="approve-button" id="gerar-pdf">Gerar PDF</button
+              ><a
+                class="secondary-button button-link"
+                id="imprimir-ocorrencia"
+                href="#"
+                target="_blank"
+                rel="noopener"
+                >Imprimir</a
+              ><span>Documento A4 com os dados atuais da ocorrência.</span>
+            </div>
+            <dl class="trip-data" id="detalhe-dados"></dl>
+            <section class="trip-passengers">
+              <h3>Passageiros</h3>
+              <ul id="detalhe-passageiros"></ul>
+              <p id="sem-passageiros" hidden>Nenhum passageiro informado.</p>
+            </section>
+            <section
+              id="finalizacao-section"
+              class="finish-section"
+              hidden
+              aria-labelledby="finalizar-title"
+            >
+              <div class="panel-heading">
+                <div>
+                  <p class="section-label">Etapa 02 · Retorno</p>
+                  <h2 id="finalizar-title">Registrar chegada</h2>
+                </div>
+              </div>
+              <p class="message" id="finalizacao-erro" role="alert" hidden></p>
+              <form id="chegada-form">
+                <div class="field-row">
+                  <div class="field">
+                    <label for="chegada-data">Data e horário de chegada</label
+                    ><input
+                      id="chegada-data"
+                      type="datetime-local"
+                      required
+                      aria-describedby="chegada-hint"
+                    />
+                    <p class="field-hint" id="chegada-hint">
+                      Horário de Brasília. Confira a data se retornou em outro dia.
+                    </p>
+                  </div>
+                  <div class="field">
+                    <label for="chegada-km">Km final</label
+                    ><input
+                      id="chegada-km"
+                      type="number"
+                      min="0"
+                      max="999999999.9"
+                      step="0.1"
+                      inputmode="decimal"
+                      required
+                    />
+                    <p class="field-hint">Use a leitura do hodômetro do veículo.</p>
+                  </div>
+                </div>
+                <div class="finish-summary">
+                  <span>Distância prevista</span><strong id="distancia-prevista">—</strong>
+                </div>
+                <div class="dialog-actions">
+                  <button class="approve-button" type="submit" id="salvar-chegada">
+                    Registrar chegada e continuar
+                  </button>
+                </div>
+              </form>
+              <section
+                id="assinatura-etapa"
+                class="signature-section"
+                hidden
+                aria-labelledby="assinar-title"
+              >
+                <p class="section-label">Etapa 03 · Confirmação</p>
+                <h2 id="assinar-title">Assine para confirmar a ocorrência</h2>
+                <p id="assinatura-mensagem" class="field-hint">
+                  Desenhe sua assinatura para confirmar os dados desta ocorrência.
+                </p>
+                <div class="signature-pad">
+                  <canvas
+                    id="assinatura-canvas"
+                    aria-label="Área de assinatura do condutor. Desenhe com mouse, dedo ou caneta."
+                    tabindex="0"
+                  ></canvas
+                  ><span id="assinatura-placeholder" aria-hidden="true">Assine aqui</span>
+                </div>
+                <div class="signature-actions">
+                  <button class="secondary-button" id="limpar-assinatura" type="button">
+                    Limpar assinatura</button
+                  ><button class="approve-button" id="confirmar-assinatura" type="button" disabled>
+                    Assinar e concluir viagem
+                  </button>
+                </div>
+                <p class="field-hint">
+                  Assinatura de protótipo para validação interna. Mantenha a assinatura física
+                  durante a avaliação.
+                </p>
+              </section>
+            </section>
+            <section
+              id="assinatura-salva"
+              class="signature-section"
+              hidden
+              aria-labelledby="assinatura-salva-title"
+            >
+              <h3 id="assinatura-salva-title">Assinatura do condutor</h3>
+              <img
+                id="assinatura-imagem"
+                alt="Assinatura do condutor vinculada a esta ocorrência"
+              />
+              <p class="field-hint" id="assinatura-info"></p>
+            </section>
+          </article>
+        </section>
+        <footer class="app-footer">Ocorrências diárias de transporte · Controle de Frotas</footer>
+      </main>
+    </div>
+  </body>
+</html>

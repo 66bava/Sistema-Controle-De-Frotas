@@ -1,0 +1,20 @@
+{
+  "name": "controle-de-frotas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "instalar": "npm --prefix backend install",
+    "dev": "npm --prefix backend run dev",
+    "start": "npm --prefix backend start",
+    "test": "npm --prefix backend test",
+    "criar-admin": "npm --prefix backend run criar-admin",
+    "test:integracao": "npm --prefix backend run test:integracao",
+    "test:interface": "npm --prefix backend run test:interface",
+    "format": "node backend/node_modules/prettier/bin/prettier.cjs --write frontend backend docs .vscode README.md package.json jsconfig.json .prettierrc.json",
+    "format:check": "node backend/node_modules/prettier/bin/prettier.cjs --check frontend backend docs .vscode README.md package.json jsconfig.json .prettierrc.json"
+  }
+}

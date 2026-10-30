@@ -1,0 +1,40 @@
+{
+  "name": "controle-de-frotas-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js",
+    "test": "node --test tests/*.test.js",
+    "criar-admin": "node --env-file=.env scripts/criar-admin.js",
+    "test:integracao": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/testar-isolado.ps1",
+    "test:interface": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/testar-isolado.ps1 -ComNavegador"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@js-temporal/polyfill": "^0.5.1",
+    "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.7.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.14.0",
+    "pdfkit": "^0.20.2",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^1.0.13",
+    "@playwright/test": "^1.64.1",
+    "pdfjs-dist": "^6.4.299",
+    "prettier": "^3.9.10"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.1"
+    }
+  }
+}

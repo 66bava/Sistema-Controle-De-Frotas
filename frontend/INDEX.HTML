@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101212" />
+    <title>Entrar · Controle de Frotas</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="script.js"></script>
+  </head>
+  <body>
+    <main class="auth-shell">
+      <aside class="brand-side" aria-label="Controle de Frotas">
+        <a class="brand" href="/"
+          ><svg class="brand-symbol" viewBox="0 0 36 36" aria-hidden="true">
+            <rect width="36" height="36" rx="10" />
+            <path d="M10 25V11h16M10 18h12" /></svg
+          ><span
+            >Controle de Frotas<br /><span class="brand-caption">GESTÃO DE TRANSPORTE</span></span
+          ></a
+        >
+        <div class="brand-copy">
+          <div class="eyebrow"><span class="dot"></span>Menos papel. Mais controle.</div>
+          <h1>O próximo destino<br />é uma frota<br /><span>mais organizada.</span></h1>
+          <p>Do início da viagem à última assinatura. Cada trajeto no lugar certo.</p>
+          <div class="journey" aria-hidden="true">
+            <span class="journey-point"><i class="point"></i>SAÍDA</span
+            ><span class="journey-line"></span
+            ><span class="journey-point"><i class="point"></i>CHEGADA</span>
+          </div>
+        </div>
+        <div class="brand-footer">
+          <span>Ocorrências diárias de transporte</span><span>Um registro. Todo o trajeto.</span>
+        </div>
+      </aside>
+      <section class="form-side" aria-label="Acesso à conta">
+        <div class="auth-card">
+          <a class="brand mobile-brand" href="/"
+            ><svg class="brand-symbol" viewBox="0 0 36 36" aria-hidden="true">
+              <rect width="36" height="36" rx="10" />
+              <path d="M10 25V11h16M10 18h12" /></svg
+            >Controle de Frotas</a
+          >
+          <div id="feedback" class="message" role="status" aria-live="polite" hidden></div>
+          <section id="view-login" aria-labelledby="login-title">
+            <p class="section-label">Seu ponto de partida</p>
+            <h2 id="login-title">Bom ter você por aqui.</h2>
+            <p class="subtitle">Entre na sua conta para continuar.</p>
+            <form id="login-form">
+              <div class="field">
+                <label for="login-email">E-mail</label
+                ><input
+                  id="login-email"
+                  name="email"
+                  type="email"
+                  autocomplete="username"
+                  placeholder="voce@empresa.com.br"
+                  required
+                  maxlength="254"
+                />
+              </div>
+              <div class="field">
+                <label for="login-senha">Senha</label>
+                <div class="password-field">
+                  <input
+                    id="login-senha"
+                    name="senha"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="Digite sua senha"
+                    required
+                    maxlength="128"
+                  /><button
+                    type="button"
+                    class="password-toggle"
+                    data-password="login-senha"
+                    aria-pressed="false"
+                  >
+                    Mostrar
+                  </button>
+                </div>
+              </div>
+              <button class="primary-button" type="submit">
+                <span>Entrar na conta</span><span class="button-arrow" aria-hidden="true">↗</span>
+              </button>
+            </form>
+            <p class="auth-switch">
+              Primeiro acesso?<button class="text-button" type="button" data-view="cadastro">
+                Solicitar cadastro
+              </button>
+            </p>
+          </section>
+          <section id="view-cadastro" aria-labelledby="cadastro-title" hidden>
+            <p class="section-label">Faça parte da equipe</p>
+            <h2 id="cadastro-title">Tudo começa por aqui.</h2>
+            <p class="subtitle">Solicite seu acesso como condutor.</p>
+            <form id="cadastro-form">
+              <div class="field">
+                <label for="cadastro-nome">Nome completo</label
+                ><input
+                  id="cadastro-nome"
+                  name="nome"
+                  autocomplete="name"
+                  placeholder="Como você se chama?"
+                  required
+                  maxlength="150"
+                />
+              </div>
+              <div class="field">
+                <label for="cadastro-email">E-mail</label
+                ><input
+                  id="cadastro-email"
+                  name="email"
+                  type="email"
+                  autocomplete="username"
+                  placeholder="voce@empresa.com.br"
+                  required
+                  maxlength="254"
+                />
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="cadastro-matricula"
+                    >Matrícula <span class="field-hint">(opcional)</span></label
+                  ><input
+                    id="cadastro-matricula"
+                    name="matricula"
+                    maxlength="50"
+                    placeholder="Sua matrícula"
+                  />
+                </div>
+                <div class="field">
+                  <label for="cadastro-funcao"
+                    >Função <span class="field-hint">(opcional)</span></label
+                  ><input
+                    id="cadastro-funcao"
+                    name="funcao"
+                    maxlength="100"
+                    placeholder="Sua função"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label for="cadastro-senha">Crie uma senha</label>
+                <div class="password-field">
+                  <input
+                    id="cadastro-senha"
+                    name="senha"
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                    minlength="10"
+                    maxlength="128"
+                    placeholder="Pelo menos 10 caracteres"
+                    aria-describedby="senha-hint"
+                  /><button
+                    type="button"
+                    class="password-toggle"
+                    data-password="cadastro-senha"
+                    aria-pressed="false"
+                  >
+                    Mostrar
+                  </button>
+                </div>
+                <p class="field-hint" id="senha-hint">Use uma senha exclusiva para sua conta.</p>
+              </div>
+              <div class="field">
+                <label for="cadastro-confirmacao">Confirme a senha</label
+                ><input
+                  id="cadastro-confirmacao"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  minlength="10"
+                  maxlength="128"
+                  placeholder="Digite a senha novamente"
+                />
+              </div>
+              <button class="primary-button" type="submit">
+                <span>Solicitar meu acesso</span
+                ><span class="button-arrow" aria-hidden="true">↗</span>
+              </button>
+            </form>
+            <p class="auth-switch">
+              Já tem uma conta?<button class="text-button" type="button" data-view="login">
+                Entrar
+              </button>
+            </p>
+          </section>
+          <section id="view-sucesso" aria-labelledby="sucesso-title" hidden>
+            <div class="success-mark" aria-hidden="true">✓</div>
+            <p class="section-label">Solicitação enviada</p>
+            <h2 id="sucesso-title">Falta só a aprovação.</h2>
+            <p class="subtitle">
+              Seu cadastro foi recebido. O administrador precisa aprovar seu acesso antes do
+              primeiro login.
+            </p>
+            <div class="pending-note">
+              <strong>O que acontece agora?</strong>Procure o responsável pela frota para acompanhar
+              a aprovação do seu cadastro.
+            </div>
+            <button class="primary-button" type="button" data-view="login">
+              Voltar para entrar
+            </button>
+          </section>
+          <div class="auth-note">
+            <svg width="14" height="16" viewBox="0 0 14 16" fill="none" aria-hidden="true">
+              <path d="M3 7V5a4 4 0 0 1 8 0v2M2 7h10v8H2z" stroke="currentColor" /></svg
+            ><span
+              >Acesso exclusivo para usuários autorizados.<br />Novos cadastros passam por
+              aprovação.</span
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

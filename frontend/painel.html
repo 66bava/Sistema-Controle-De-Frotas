@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101212" />
+    <title>Área interna · Controle de Frotas</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="painel.js"></script>
+  </head>
+  <body class="app-layout">
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+    <aside class="sidebar" id="sidebar" aria-label="Menu principal" aria-hidden="true" inert>
+      <div class="sidebar-brand">
+        <a class="brand" href="/painel.html"
+          ><svg class="brand-symbol" viewBox="0 0 36 36" aria-hidden="true">
+            <rect width="36" height="36" rx="10" />
+            <path d="M10 25V11h16M10 18h12" /></svg
+          ><span>Controle<br />de Frotas</span></a
+        ><button
+          class="sidebar-close"
+          id="fechar-menu"
+          type="button"
+          aria-label="Fechar menu de navegação"
+        >
+          ×
+        </button>
+      </div>
+      <p class="sidebar-caption">TRANSPORTE DIÁRIO</p>
+      <nav id="sidebar-links" aria-label="Navegação principal"></nav>
+      <div class="sidebar-account">
+        <span class="account-avatar" id="menu-avatar" aria-hidden="true">F</span>
+        <div><strong id="menu-nome">Carregando…</strong><span id="perfil"></span></div>
+      </div>
+      <button id="sair" class="sidebar-logout" type="button">
+        <span aria-hidden="true">↪</span>Sair da conta
+      </button>
+    </aside>
+    <button
+      type="button"
+      id="menu-overlay"
+      class="menu-overlay"
+      aria-label="Fechar menu"
+      tabindex="-1"
+      hidden
+    ></button>
+    <div class="app-content">
+      <header class="app-header">
+        <div class="mobile-header">
+          <button
+            id="abrir-menu"
+            class="menu-toggle"
+            type="button"
+            disabled
+            aria-label="Abrir menu de navegação"
+            aria-controls="sidebar"
+            aria-expanded="false"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 6h16M4 12h16M4 18h16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+              /></svg
+            >Menu</button
+          ><span class="header-location" id="header-location">Início</span>
+        </div>
+        <span class="header-app-name">Controle de Frotas</span>
+      </header>
+      <main class="workspace" id="conteudo" tabindex="-1">
+        <div class="eyebrow"><span class="dot"></span>Área interna</div>
+        <h1 id="boas-vindas">Carregando sua conta…</h1>
+        <p class="workspace-intro" id="introducao">Conferindo seu acesso.</p>
+        <div class="message" id="feedback" role="status" aria-live="polite" hidden></div>
+        <section id="admin-panel" class="content-panel" aria-labelledby="pendentes-title" hidden>
+          <div class="panel-heading">
+            <div>
+              <h2 id="pendentes-title">Solicitações de acesso</h2>
+              <p>Confira os cadastros e libere o acesso dos condutores.</p>
+            </div>
+            <button type="button" class="secondary-button" id="atualizar">Atualizar</button>
+          </div>
+          <p id="lista-status" role="status" aria-live="polite"></p>
+          <div class="table-wrap" id="tabela-wrap" hidden>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Condutor</th>
+                  <th scope="col">Matrícula</th>
+                  <th scope="col">Função</th>
+                  <th scope="col">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="pendentes"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="veiculos-panel" class="content-panel" hidden aria-labelledby="veiculos-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="veiculos-title">Veículos</h2>
+              <p>Organize os veículos disponíveis para a equipe.</p>
+            </div>
+            <button type="button" class="approve-button" id="novo-veiculo">Novo veículo</button>
+          </div>
+          <div class="cadastro-filters">
+            <div class="field">
+              <label for="busca-veiculos">Buscar veículo</label
+              ><input
+                id="busca-veiculos"
+                type="search"
+                placeholder="Marca, modelo, placa ou número interno"
+                autocomplete="off"
+              />
+            </div>
+            <div class="field">
+              <label for="filtro-veiculos">Status</label
+              ><select id="filtro-veiculos">
+                <option value="todos">Todos</option>
+                <option value="ativos">Ativos</option>
+                <option value="inativos">Inativos</option>
+              </select>
+            </div>
+            <button type="button" class="secondary-button" id="atualizar-veiculos">
+              Atualizar lista
+            </button>
+          </div>
+          <p id="status-veiculos" role="status" aria-live="polite"></p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Veículo</th>
+                  <th scope="col">Placa</th>
+                  <th scope="col">Número interno</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="lista-veiculos"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="setores-panel" class="content-panel" hidden aria-labelledby="setores-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="setores-title">Setores</h2>
+              <p>Mantenha os setores usados nos registros de viagem.</p>
+            </div>
+            <button type="button" class="approve-button" id="novo-setor">Novo setor</button>
+          </div>
+          <div class="cadastro-filters">
+            <div class="field">
+              <label for="busca-setores">Buscar setor</label
+              ><input
+                id="busca-setores"
+                type="search"
+                placeholder="Nome do setor"
+                autocomplete="off"
+              />
+            </div>
+            <div class="field">
+              <label for="filtro-setores">Status</label
+              ><select id="filtro-setores">
+                <option value="todos">Todos</option>
+                <option value="ativos">Ativos</option>
+                <option value="inativos">Inativos</option>
+              </select>
+            </div>
+            <button type="button" class="secondary-button" id="atualizar-setores">
+              Atualizar lista
+            </button>
+          </div>
+          <p id="status-setores" role="status" aria-live="polite"></p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Setor</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="lista-setores"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="inicio-panel" hidden aria-labelledby="resumo-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="resumo-title" class="home-title">Visão geral</h2>
+              <p id="dashboard-escopo"></p>
+            </div>
+            <button type="button" class="secondary-button" id="atualizar-dashboard">
+              Atualizar resumo
+            </button>
+          </div>
+          <p id="dashboard-status" role="status" aria-live="polite"></p>
+          <div id="dashboard-dados" hidden>
+            <div class="dashboard-indicadores">
+              <article class="dashboard-card">
+                <h3>Ocorrências de hoje</h3>
+                <strong id="indicador-hoje">—</strong>
+                <p>Saídas de hoje, no horário de Brasília.</p>
+              </article>
+              <article class="dashboard-card">
+                <h3>Em andamento</h3>
+                <strong id="indicador-em_andamento">—</strong>
+                <p>Viagens que ainda precisam ser concluídas.</p>
+              </article>
+              <article class="dashboard-card">
+                <h3>Concluídas</h3>
+                <strong id="indicador-concluidas">—</strong>
+                <p>Total de viagens assinadas e concluídas.</p>
+              </article>
+              <article class="dashboard-card">
+                <h3>Veículos ativos</h3>
+                <strong id="indicador-veiculos_ativos">—</strong>
+                <p>Cadastros ativos da frota, incluindo veículos em viagem.</p>
+              </article>
+            </div>
+            <section class="content-panel" aria-labelledby="recentes-title">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="recentes-title">Viagens recentes</h2>
+                  <p>As cinco saídas mais recentes.</p>
+                </div>
+                <a class="secondary-button" href="/ocorrencias.html">Ver histórico</a>
+              </div>
+              <p id="recentes-vazio" hidden>Nenhuma viagem registrada ainda.</p>
+              <div id="dashboard-recentes" class="dashboard-recentes"></div>
+            </section>
+          </div>
+          <h2 id="atalhos-title" class="home-title">O que você deseja fazer?</h2>
+          <p class="home-description">Escolha uma opção abaixo ou use o menu lateral.</p>
+          <div class="home-shortcuts" id="atalhos-inicio"></div>
+        </section>
+        <dialog class="cadastro-dialog" id="dialog-veiculo" aria-labelledby="titulo-veiculo">
+          <form id="form-veiculo">
+            <div class="panel-heading">
+              <div>
+                <p class="section-label">Cadastros da frota</p>
+                <h2 id="titulo-veiculo">Novo veículo</h2>
+              </div>
+              <button
+                type="button"
+                class="dialog-close"
+                id="fechar-veiculo"
+                aria-label="Fechar formulário de veículo"
+              >
+                ×
+              </button>
+            </div>
+            <p class="message" id="erro-veiculo" role="alert" hidden></p>
+            <div class="field-row">
+              <div class="field">
+                <label for="veiculo-marca">Marca</label
+                ><input
+                  id="veiculo-marca"
+                  name="marca"
+                  maxlength="80"
+                  placeholder="Ex.: Chevrolet"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="veiculo-modelo">Modelo</label
+                ><input
+                  id="veiculo-modelo"
+                  name="modelo"
+                  maxlength="100"
+                  placeholder="Ex.: Spin"
+                  required
+                />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="veiculo-placa">Placa</label
+                ><input
+                  id="veiculo-placa"
+                  name="placa"
+                  maxlength="10"
+                  placeholder="ABC1D23"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="veiculo-numero-interno">Número interno (opcional)</label
+                ><input
+                  id="veiculo-numero-interno"
+                  name="numero_interno"
+                  maxlength="50"
+                  placeholder="Ex.: FROTA-01"
+                />
+              </div>
+            </div>
+            <label class="checkbox-field"
+              ><input type="checkbox" name="ativo" id="veiculo-ativo" checked />Cadastro
+              ativo</label
+            >
+            <div class="dialog-actions">
+              <button class="secondary-button" type="button" id="cancelar-veiculo">Cancelar</button
+              ><button class="approve-button" type="submit">Salvar veículo</button>
+            </div>
+          </form>
+        </dialog>
+        <dialog class="cadastro-dialog" id="dialog-setor" aria-labelledby="titulo-setor">
+          <form id="form-setor">
+            <div class="panel-heading">
+              <div>
+                <p class="section-label">Cadastros da frota</p>
+                <h2 id="titulo-setor">Novo setor</h2>
+              </div>
+              <button
+                type="button"
+                class="dialog-close"
+                id="fechar-setor"
+                aria-label="Fechar formulário de setor"
+              >
+                ×
+              </button>
+            </div>
+            <p class="message" id="erro-setor" role="alert" hidden></p>
+            <div class="field">
+              <label for="setor-nome">Nome do setor</label
+              ><input
+                id="setor-nome"
+                name="nome"
+                maxlength="100"
+                placeholder="Ex.: Comercial"
+                required
+              />
+            </div>
+            <label class="checkbox-field"
+              ><input type="checkbox" name="ativo" id="setor-ativo" checked />Cadastro ativo</label
+            >
+            <div class="dialog-actions">
+              <button class="secondary-button" type="button" id="cancelar-setor">Cancelar</button
+              ><button class="approve-button" type="submit">Salvar setor</button>
+            </div>
+          </form>
+        </dialog>
+        <footer class="app-footer">Ocorrências diárias de transporte · Controle de Frotas</footer>
+      </main>
+    </div>
+  </body>
+</html>

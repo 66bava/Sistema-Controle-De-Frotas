@@ -1,0 +1,14 @@
+:root {
+  color-scheme: dark;
+  --bg: #101212;
+  --surface: #191c1c;
+  --surface-hover: #222727;
+  --border: #343a38;
+  --text: #f2f5f2;
+  --muted: #a5afa8;
+  --green: #b1ef70;
+  --green-dark: #172111;
+  --danger: #ffb5ac;
+  --radius: 16px;
+  --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}

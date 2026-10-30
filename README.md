@@ -1,10 +1,10 @@
 # Sistema de Controle de Frotas
 
-Projeto web para organizar os registros diários de viagens de uma pequena frota empresarial.
+Projeto web para organizar os registros diários de viagens com frota empresarial.
 
 ## Problema e público afetado
 
-Atualmente, os condutores preenchem os dados das viagens em folhas de papel. Depois, a equipe administrativa precisa digitar essas informações novamente em uma planilha Excel.
+Atualmente, muitas empresas preenchem os dados das viagens em folhas de papel. Depois, a equipe administrativa precisa digitar essas informações novamente em uma planilha Excel.
 
 Esse processo gera retrabalho, dificulta a consulta do histórico e aumenta a possibilidade de erros. O público afetado são os condutores e a equipe responsável pelo controle dos registros da frota.
 

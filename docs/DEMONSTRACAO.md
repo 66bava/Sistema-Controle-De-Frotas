@@ -12,7 +12,20 @@ Antes da apresentação, registre e conclua uma viagem de demonstração com che
 
 Os testes automatizados também criam condutores e ocorrências fictícias em um banco temporário separado, cobrindo os três perfis, viagens concluídas/em andamento e correções; não modificam seu banco local.
 
-## Roteiro sugerido
+## Entrega 3: CRUD, integração e permissões
+
+1. Entre como administrador e abra Veículos no menu lateral. Cadastre um veículo fictício com placa válida e número interno ainda não utilizados (POST /api/veiculos).
+2. Localize o veículo na lista e recarregue a página para mostrar a consulta dos dados persistidos no MySQL (GET /api/veiculos).
+3. Use Editar para alterar o modelo, salve e confira o resultado após recarregar (PUT /api/veiculos/:id).
+4. Tente cadastrar uma placa duplicada e uma placa inválida para mostrar as mensagens de validação. Explique que o backend também valida as entradas.
+5. Use Arquivar no veículo fictício e confirme (DELETE /api/veiculos/:id). Mostre que ele sai da lista e explique a exclusão lógica: o banco preserva o registro e os vínculos históricos. Desativar é uma ação diferente, que permite reativação pela interface.
+6. Na aba Network/Rede das ferramentas do navegador, mostre os métodos e respostas das requisições. Relacione o Fetch em frontend/api.js e a atualização do DOM em frontend/cadastros.js às rotas e consultas do backend.
+7. Entre como Condutor ou Consulta e acesse /api/veiculos pela barra do navegador para demonstrar a resposta de acesso negado. Mostre em backend/routes/cadastrosRoutes.js que todas as operações exigem admin, inclusive quando chamadas diretamente, sem passar pelos botões.
+8. Demonstre o bloqueio de nova viagem para condutor ou veículo já ocupado e a rejeição de km final inferior ao inicial. Use o fluxo de viagens descrito abaixo.
+
+Use somente o veículo fictício criado para essa demonstração ao arquivar. As alterações feitas pelas telas ficam no banco local.
+
+## Roteiro completo do MVP
 
 1. Apresente o problema, o público e a proposta de registrar os dados uma única vez.
 2. Mostre cadastro pendente, aprovação e os acessos de Condutor, Consulta e Administrador.

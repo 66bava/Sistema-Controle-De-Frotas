@@ -70,11 +70,14 @@ Já estão implementados autenticação, aprovação de condutores, veículos, s
 
 Também estão implementadas a gestão de usuários (ativação, desativação e alteração de perfis) e as correções de viagens concluídas, com justificativa, duas assinaturas e preservação da versão anterior.
 
+## Entrega 3
+
+Implementada: CRUD de veículos com POST, GET, PUT e DELETE, integrado entre interface, API e MySQL. O frontend utiliza DOM e Fetch; a API verifica permissões e validações. A exclusão é feita por arquivamento para preservar o histórico das viagens. Os passos para demonstrar essas operações estão no [roteiro da entrega 3](docs/DEMONSTRACAO.md#entrega-3-crud-integração-e-permissões).
+
 ## Documentação complementar
 
 - [Guia técnico e instruções de instalação](docs/GUIA_TECNICO.md).
 - [Mapa do código](docs/NAVEGACAO.md).
 - [Plano de desenvolvimento](docs/PLANO.md).
 - [Script completo do banco](sql/banco.sql) e [instruções do MySQL Workbench](sql/README.md).
-
 - [Roteiro de demonstração do MVP](docs/DEMONSTRACAO.md).
